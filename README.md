@@ -1,18 +1,10 @@
 
 
 
-# docker-pinpointing-experiments
+# docker-prunpinpointing-experiments
 
-Docker image for pinpointing experiments.
+Docker image for pruning pinpointing experiments.
 It runs a simple HTTP server using which the experiments can be started.
-
-
-# Quick start:
-   (no need to clone the repository: a pre-compiled image will be downloaded from [docker.com](https://www.docker.com))
-   ```
-   docker run -d -p 3030:3030 --name pinpointing-container liveontologies/pinpointing
-   ```
-   Open a web browser with the address http://localhost:3030/ or http://0.0.0.0:3030.   
 
 # Prerequisites: 
 
@@ -23,7 +15,7 @@ It runs a simple HTTP server using which the experiments can be started.
 
 1. Clone the repository
    ```
-   git clone https://github.com/liveontologies/docker-pinpointing-experiments.git
+   git clone https://github.com/marnadir/docker-prunpinpointing-experiments.git
    ```
 
 1. Invoke the following command in the root directory of the repository:
