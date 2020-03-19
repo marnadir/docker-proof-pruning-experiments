@@ -3,22 +3,36 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.liveontologies</groupId>
-	<artifactId>docker-pruning-experiments</artifactId>
-	<version>0.1.2-SNAPSHOT</version>
+	<groupId>com.github.marnadir</groupId>
+	<artifactId>docker-prunpinpointing-experiments</artifactId>
+	<version>0.1.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
+	
+	<name>docker-prunpinpointing-experiments</name>
+	<url>https://github.com/marnadir/docker-prunpinpointing-experiments</url>
+	
+	
+	<scm>
+		<connection>scm:git:https://github.com/marnadir/docker-prunpinpointing-experiments.git</connection>
+		<developerConnection>scm:git:git@github.com:marnadir/docker-prunpinpointing-experiments.git</developerConnection>
+		<url>https://github.com/marnadir/docker-prunpinpointing-experiments.git</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	
 
 	<repositories>
-		<repository>
-			<id>nexus</id>
-			<url>http://localhost:8081/repository/maven-snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
 		<repository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -37,22 +51,16 @@
 	  -->		  
 	<dependencies>
 		<dependency>
-			<groupId>org.liveontologies</groupId>
-			<artifactId>pinpointing-experiments</artifactId>
-			<version>0.1.5-SNAPSHOT</version>
+			<groupId>com.github.marnadir</groupId>
+			<artifactId>prunpinpointing-experiments</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 
 	<distributionManagement>
-		<repository>
-			<id>nexus</id>
-			<name>maven-releases</name>
-			<url>http://localhost:8081/repository/maven-releases/</url>
-		</repository>
 		<snapshotRepository>
-			<id>nexus</id>
-			<name>maven-snapshots</name>
-			<url>http://localhost:8081/repository/maven-snapshots/</url>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -74,10 +82,10 @@
 				<configuration>
 					<images>
 						<image>
-							<name>liveontologies/pinpointing:${project.version}</name>
-							<alias>pinpointing-container</alias>
+							<name>marnadir/docker-prunpinpointing-experiments::${project.version}</name>
+							<alias>prunpinpointing-container</alias>
 							<build>
-								<dockerFileDir>pinpointing</dockerFileDir>
+								<dockerFileDir>prunpinpointing</dockerFileDir>
 								<assembly>
 									<descriptorRef>artifact-with-dependencies</descriptorRef>
 								</assembly>
