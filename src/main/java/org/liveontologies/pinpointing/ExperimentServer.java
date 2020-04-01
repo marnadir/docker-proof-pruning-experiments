@@ -19,6 +19,7 @@
  * limitations under the License.
  * #L%
  */
+
 package org.liveontologies.pinpointing;
 
 import java.io.BufferedReader;
@@ -43,7 +44,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.annotation.concurrent.GuardedBy;
 
@@ -67,7 +67,6 @@ public class ExperimentServer extends NanoHTTPD {
 	public static final String OPT_EXPERIMENTS = "exps";
 	public static final String OPT_WORKSPACE = "workspace";
 	public static final String OPT_COMMAND = "command";
-	
 
 	public static final Integer DEFAULT_PORT = 80;
 
@@ -651,6 +650,10 @@ public class ExperimentServer extends NanoHTTPD {
 			// contains all sorted results with name of queries and times
 			ArrayList<ArrayList<QueryResult>> queryResults_all = new ArrayList<ArrayList<QueryResult>>();
 			ArrayList<String> infNames = new ArrayList<String>();
+			ArrayList<String> expNames = new ArrayList<String>();
+
+			
+			
 			for(final File file : files) {
 				String fileName = file.getName();
 				String[] fileNameSplit = fileName.split("\\.");
@@ -658,12 +661,11 @@ public class ExperimentServer extends NanoHTTPD {
 					continue;
 				}
 				
-				ArrayList<QueryResult> queryResult_infCy_Ess = new ArrayList<QueryResult>();
-				ArrayList<QueryResult> queryResult_infCy = new ArrayList<QueryResult>();
-				ArrayList<QueryResult> queryResult_infEssPr = new ArrayList<QueryResult>();
-				ArrayList<QueryResult> queryResult_infJust = new ArrayList<QueryResult>();
+				expNames.add(fileNameSplit[2]);
+
+
 				ArrayList<QueryResult> queryResult_inf = new ArrayList<QueryResult>();
-				ArrayList<QueryResult> queryResult_justSize = new ArrayList<QueryResult>();
+
 
 		
 		
@@ -671,91 +673,30 @@ public class ExperimentServer extends NanoHTTPD {
 				String line;
 				int nameIndex = 0;
 				int infs = 0;
-				int infsEssPr=0;
-				int infsCyPr=0;
-				int infJust=0;
-				int infCyEss=0;
-				int justSize=0;
 
-				
-				
 				try {
 					// read data from csv files
 					br = new BufferedReader(new FileReader(file));
-					if((line=br.readLine()) != null) {
-		                input = line.split(",");
-		                for (int j = 0; j < input.length; j++) {
-							if(input[j].equals("query")) {
+					if ((line = br.readLine()) != null) {
+						input = line.split(",");
+						for (int j = 0; j < input.length; j++) {
+							if (input[j].equals("query")) {
 								nameIndex = j;
 							}
-							if(input[j].equals("sizeNoPruning")) {
+							if (input[j].equals("nInferences")) {
 								infs = j;
 								infNames.add(input[infs]);
 							}
-							if(input[j].equals("sizeEssPruning")) {
-								infsEssPr = j;
-								infNames.add(input[infsEssPr]);
 
-							}
-							if(input[j].equals("sizeCyPruning")) {
-								infsCyPr = j;
-								infNames.add(input[infsCyPr]);
-
-							}
-							if(input[j].equals("SizeEssPruningCy")) {
-								infCyEss = j;
-								infNames.add(input[infCyEss]);
-
-							}
-							if(input[j].equals("sizeJusUnionPruning")) {
-								infJust = j;
-								infNames.add(input[infJust]);
-
-							}
-							if(input[j].equals("sizeUnionJust")) {
-								justSize = j;
-								infNames.add(input[justSize]);
-
-							}
-							
-						
-		                
-		                }
+						}
 					}
 					while((line=br.readLine()) != null) {
 		                input = line.split(",");
-		                
-		            	//query inf cycles+ess
-						double inf = Double.valueOf(input[infCyEss]);
-						QueryResult qr = new QueryResult(input[nameIndex],inf);
-						queryResult_infCy_Ess.add(qr);
-		                
-						//query inf cycles
-		                inf = Double.valueOf(input[infsCyPr]);
-						qr = new QueryResult(input[nameIndex],inf);
-						queryResult_infCy.add(qr);
-						
-						//query inf ess pruning
-		                inf = Double.valueOf(input[infsEssPr]);
-						qr = new QueryResult(input[nameIndex],inf);
-						queryResult_infEssPr.add(qr);
-						
-						
-						// //query inf just
-		                inf = Double.valueOf(input[infJust]);
-						qr = new QueryResult(input[nameIndex],inf);
-						queryResult_infJust.add(qr);
-						
+
 						//query inf without pruning
-		                 inf = Double.valueOf(input[infs]);
-						 qr = new QueryResult(input[nameIndex],inf);
+		                double inf = Double.valueOf(input[infs]);
+		                QueryResult qr = new QueryResult(input[nameIndex],inf);
 						queryResult_inf.add(qr);
-						
-						// //query just union size
-		                inf = Double.valueOf(input[justSize]);
-						qr = new QueryResult(input[nameIndex],inf);
-						queryResult_justSize.add(qr);
-						
 						
 						
 					}
@@ -773,18 +714,15 @@ public class ExperimentServer extends NanoHTTPD {
 					}
 				}
 				
-				queryResults_all.add(queryResult_infCy_Ess);
-				queryResults_all.add(queryResult_infCy);
-				queryResults_all.add(queryResult_infEssPr);
-				queryResults_all.add(queryResult_infJust);
+
 				queryResults_all.add(queryResult_inf);
-				queryResults_all.add(queryResult_justSize);
+
 
 
 				
 			}
 			
-			int expSize = infNames.size();
+			int expSize = expNames.size();
 			int minIndex = queryResults_all.stream().min(Comparator.comparing(list -> list.size())).get().size();
 			ArrayList<ArrayList<QueryResult>> queryResults_min = minimizeQueryResults(queryResults_all, minIndex);
 			
@@ -829,13 +767,13 @@ public class ExperimentServer extends NanoHTTPD {
 						"  activeLines"+i+".push("+k+");\n" + 
 						"  queryArr"+i+".push("+queryNames.toString()+");\n" +
 						"  timesArr"+i+".push("+queryTimes.toString()+");\n" +
-						"  expNames"+i+".push('"+infNames.get(k)+"');\n");
+						"  expNames"+i+".push('"+expNames.get(k)+"');\n");
 			}
 
 			plotString.append("  traces = [\n");
 			// add experiments to plot
 			for(int k=0; k<expSize; k++) {
-				addToPlot(infNames.get(k), queryResults_sort.get(k), plotString, k);
+				addToPlot(expNames.get(k), queryResults_sort.get(k), plotString, k);
 			}
 
 			// markers for red points on click
@@ -851,7 +789,7 @@ public class ExperimentServer extends NanoHTTPD {
 			plotString.append(
 			"    var layout = {\n" + 
 			"      hovermode:'closest',\n" + 
-			"  	   title: 'Plot for "+ontologieName+"',\n" + 
+			"  	   title: 'Plot Proofs for "+ontologieName+"',\n" + 
 			"      xaxis: {\n" + 
 			"        title: '\\% of queries',\n" +
 			"        showline: true,\n" + 
@@ -869,7 +807,7 @@ public class ExperimentServer extends NanoHTTPD {
 			"    	mirror: 'ticks',\n" + 
 			"    	linewidth: 1,\n" + 
 			"    	range: [-3, 2],\n" +
-			"       title: 'n inferences'\n" +
+			"       title: 'n° inferences'\n" +
 			"      }\n" + 
 			"    };\n");
 			
@@ -1155,6 +1093,454 @@ public class ExperimentServer extends NanoHTTPD {
 			i++;
 		}
 
+		for (final String ontologieName : ontologiesList) {
+			
+			// contains all sorted results with name of queries and times
+			ArrayList<ArrayList<QueryResult>> queryResults_all = new ArrayList<ArrayList<QueryResult>>();
+			ArrayList<String> infNames = new ArrayList<String>();
+			ArrayList<String> expNames = new ArrayList<String>();
+
+			
+			
+			for(final File file : files) {
+				String fileName = file.getName();
+				String[] fileNameSplit = fileName.split("\\.");
+				if(!fileNameSplit[1].equals(ontologieName)) {
+					continue;
+				}
+				
+				expNames.add(fileNameSplit[2]);
+
+
+				ArrayList<QueryResult> queryResult_time = new ArrayList<QueryResult>();
+
+
+		
+		
+				String[] input = null;
+				String line;
+				int nameIndex = 0;
+				int time = 0;
+
+				try {
+					// read data from csv files
+					br = new BufferedReader(new FileReader(file));
+					if ((line = br.readLine()) != null) {
+						input = line.split(",");
+						for (int j = 0; j < input.length; j++) {
+							if (input[j].equals("query")) {
+								nameIndex = j;
+							}
+							if (input[j].equals("time")) {
+								time = j;
+								infNames.add(input[time]);
+							}
+
+						}
+					}
+					while((line=br.readLine()) != null) {
+		                input = line.split(",");
+
+						//query inf without pruning
+		                double inf = Double.valueOf(input[time]);
+		                QueryResult qr = new QueryResult(input[nameIndex],inf);
+						queryResult_time.add(qr);
+						
+						
+					}
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					if (br != null) {
+						try {
+							br.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				
+
+				queryResults_all.add(queryResult_time);
+
+
+
+				
+			}
+			
+			int expSize = expNames.size();
+			int minIndex = queryResults_all.stream().min(Comparator.comparing(list -> list.size())).get().size();
+			ArrayList<ArrayList<QueryResult>> queryResults_min = minimizeQueryResults(queryResults_all, minIndex);
+			
+		
+			
+			// sort
+			ArrayList<ArrayList<QueryResult>> queryResults_sort = sortQueryResults(queryResults_min);
+
+			// start javascript
+			plotString.append(
+					"<div id=\"myDiv" + i +"\"><!-- Plotly chart will be drawn inside this DIV --></div>\n" + 
+					"<div id=\"clickinfo"+i+"\" style=\"margin-left:80px;\"></div>\n"+
+					"<div id=\"hoverinfo"+i+"\" style=\"margin-left:80px;style=\"margin-bottom:80px;\"></div>\n"+
+					"<div id=\"test"+i+"\" style=\"margin-left:80px;\"></div>\n"+
+					"<script>\n" + 
+					"    var allColors = ['#426CDA','#53CE40','#FFC100','#8B008B','#D2691E','#87CEFA','#008000','#FF00FF','#FF8C00','#A9A9A9'],\n"+
+					"    expSize = "+expSize+",\n" +
+			// translate objects from java to javascript
+					"    query"+i+",\n" +
+					"    activeLines"+i+" = [],\n" + 
+					"    queryArr"+i+" = [],\n" + 
+					"    timesArr"+i+" = [],\n" + 
+					"    expNames"+i+" = [];\n" +
+					"    var colors = allColors.slice(0,expSize);\n"
+					);
+			
+				plotString.append(
+					"    colors[(expSize-1)] = '#000000';\n"
+				);
+		
+			
+			for(int k=0; k<expSize; k++) {
+				ArrayList<String> queryNames = new ArrayList<String>();
+				ArrayList<Double> queryTimes = new ArrayList<Double>();
+				for(QueryResult qr : queryResults_sort.get(k)) {
+					String query = qr.query;
+					double time = qr.time;
+					queryNames.add(query);
+					queryTimes.add(time);
+				}
+				plotString.append(
+						"  activeLines"+i+".push("+k+");\n" + 
+						"  queryArr"+i+".push("+queryNames.toString()+");\n" +
+						"  timesArr"+i+".push("+queryTimes.toString()+");\n" +
+						"  expNames"+i+".push('"+expNames.get(k)+"');\n");
+			}
+
+			plotString.append("  traces = [\n");
+			// add experiments to plot
+			for(int k=0; k<expSize; k++) {
+				addToPlot(expNames.get(k), queryResults_sort.get(k), plotString, k);
+			}
+
+			// markers for red points on click
+			plotString.append(
+			"{\n" + 
+			"  x: [], \n" + 
+			"  y: [],\n" + 
+			"  mode: 'markers',\n" +
+			"  visible: false,\n" +
+			"}];\n");
+
+			// add layout
+			plotString.append(
+			"    var layout = {\n" + 
+			"      hovermode:'closest',\n" + 
+			"  	   title: 'Plot Time for "+ontologieName+"',\n" + 
+			"      xaxis: {\n" + 
+			"        title: '\\% of queries',\n" +
+			"        showline: true,\n" + 
+			"        tickvals: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],\n" + 
+			"        ticktext: ['', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'],\n" + 
+			"        mirror: 'ticks',\n" + 
+			"        linewidth: 1,\n" + 
+			"    	 autorange: true,\n" +
+			"      },\n" + 
+			"      yaxis: {\n" + 
+			"       type: 'log',\n" + 
+			"    	tickvals: [0.001, 0.01, 0.1, 1, 10, 60],\n" + 
+			"    	ticktext: ['', '0.01', '0.1', '1', '10', '60'],\n" + 
+			"    	mirror: 'ticks',\n" + 
+			"    	linewidth: 1,\n" + 
+			"    	range: [-3, 2],\n" +
+			"       title: 'time in seconds'\n" +
+			"      }\n" + 
+			"    };\n");
+			
+			// plot
+			plotString.append(
+			"  Plotly.newPlot('myDiv"+i+"', traces, layout);\n" +
+			"  myPlot"+i+" = document.getElementById('myDiv"+i+"');\n"
+			);
+
+			// event legendclick
+			plotString.append(
+			"  myPlot"+i+".on('plotly_legendclick', function(data){\n" + 
+			"	 number = data.curveNumber;\n" + 
+			"	 if(activeLines"+i+".indexOf(number) < 0){\n" + 
+			"		activeLines"+i+".push(number);\n" + 
+			"	 } else {\n" + 
+			"	    activeLines"+i+".splice(activeLines"+i+".indexOf(number), 1);\n" + 
+			"	 }\n" + 
+			
+			"    refresh"+i+"();\n " +
+			"	 if(myPlot"+i+".data[expSize].visible == true){\n" +
+			"      visibleLines = false;\n" +
+			"	   for(k = 0; k<(expSize-1); k++){\n" + 
+			"        if(activeLines"+i+".indexOf(k) >= 0){\n" +
+			"          visibleLines = true;\n" +
+			"          break;\n" +
+			"        }\n" +
+		    "      }\n" +
+			"      if (visibleLines == true){" +
+			"        clickinfo"+i+".innerHTML = '<b><span style=\"color:#FF0000\">QUERYs: '+query"+i+"+'</span></b><br>';\n" +
+			"	     for(k = 0; k<expSize; k++){\n" + 
+			"          if(activeLines"+i+".indexOf(k) < 0){\n" +
+			"            continue;\n" +
+			"          }\n" +
+			"          index = queryArr"+i+"[k].indexOf(query"+i+");" +
+			"          if((index >= 0) && (clickinfo"+i+".innerHTML != '')){\n" +
+			"            clickinfo"+i+".innerHTML += '<span style=\"color:'+colors[k]+'\"> '+expNames"+i+"[k]+': </span>'+" +
+			"             (timesArr"+i+"[k][index])+' <br>';\n" +
+		    "          }\n" +
+			"        }\n" +
+			"        clickinfo"+i+".innerHTML += '<br>';\n" +
+			"      } else {\n" +
+			"        clickinfo"+i+".innerHTML = ' <br>';\n" +
+			"      }\n" +
+			"    } else {\n" +
+			"      clickinfo"+i+".innerHTML = ' <br>';\n" +
+			"    }" +
+			"  });\n" +
+
+			// event legend doubleclick
+			"  myPlot"+i+".on('plotly_legenddoubleclick', function(data){\n" + 
+			"	 number = data.curveNumber;\n" + 
+			"	 if(activeLines"+i+".indexOf(number) < 0){\n" + 
+			"		activeLines"+i+".push(number);\n" + 
+			"	 } else {\n" + 
+			"	    activeLines"+i+".splice(activeLines"+i+".indexOf(number), 1);\n" + 
+			"	 }\n" + 
+			"    refresh"+i+"();\n " +
+			"	 if(myPlot"+i+".data[expSize].visible == true){\n" +
+			"      visibleLines = false;\n" +
+			"	   for(k = 0; k<(expSize-1); k++){\n" + 
+			"        if(activeLines"+i+".indexOf(k) >= 0){\n" +
+			"          visibleLines = true;\n" +
+			"          break;\n" +
+			"        }\n" +
+		    "      }\n" +
+			"      if (visibleLines == true){" +
+			"        clickinfo"+i+".innerHTML = '<b><span style=\"color:#FF0000\">QUERY: '+query"+i+"+'</span></b><br>';\n" +
+			"	     for(k = 0; k<expSize; k++){\n" + 
+			"          if(activeLines"+i+".indexOf(k) < 0){\n" +
+			"            continue;\n" +
+			"          }\n" +
+			"          index = queryArr"+i+"[k].indexOf(query"+i+");" +
+			"          if((index >= 0) && (clickinfo"+i+".innerHTML != '')){\n" +
+			"            clickinfo"+i+".innerHTML += '<span style=\"color:'+colors[k]+'\"> '+expNames"+i+"[k]+': </span>'+" +
+			"              getTime(timesArr"+i+"[k][index])+' <br>';\n" +
+		    "          }\n" +
+			"        }\n" +
+			"        clickinfo"+i+".innerHTML += '<br>';\n" +
+			"      } else {\n" +
+			"        clickinfo"+i+".innerHTML = ' <br>';\n" +
+			"      }\n" +
+			"    } else {\n" +
+			"      clickinfo"+i+".innerHTML = ' <br>';\n" +
+			"    }" +
+			"	 return false;\n" +
+			"  });" +
+
+			// clear array
+			"  Array.prototype.clear = function() {\n" + 
+			"    this.splice(0, this.length);\n" + 
+			"  };\n" + 
+
+			// event mouseover
+			"  myPlot"+i+".on('plotly_hover', function(data){\n" + 
+			"    len = data.points.length;\n" + 
+			"    tn = data.points[0].curveNumber;\n" + 
+			"    if ((len == 1) && (tn < expSize)) {\n" + 
+			"      pn = data.points[0].pointNumber;\n" + 
+			"      name = data.points[0].data.name;\n" + 
+			"      query = queryArr"+i+"[tn][pn];\n" +
+			"      hoverinfo"+i+".innerHTML = '<b>QUERY: '+ query +'</b><br> ';\n" +
+			"	   for(k = 0; k<expSize; k++){\n" + 
+			"        if(activeLines"+i+".indexOf(k) < 0){" +
+			"          continue;" +
+			"        }" +
+			"        index = queryArr"+i+"[k].indexOf(query);" +
+			"        if(index >= 0){" +
+			"	       hoverinfo"+i+".innerHTML += '<span style=\"color:'+colors[k]+'\"> '+expNames"+i+"[k]+': </span>'+" +
+			"            getTime(timesArr"+i+"[k][index])+' <br>';" +
+			"        }" +			
+			"      }"+ 
+			"    } else {\n" + 
+			"      hoverinfo"+i+".innerHTML = '';\n" + 
+			"    }\n" + 
+			"  });\n"+
+			
+			// event not mouseover
+			"  myPlot"+i+".on('plotly_unhover', function(data){\n" + 
+			"    hoverinfo"+i+".innerHTML = '';\n" + 
+			"  });" + 
+			
+			// event on click
+			"  myPlot"+i+".on('plotly_click', function(data){\n" + 
+			"    len = data.points.length;\n" + 
+			"    tn = data.points[0].curveNumber;\n" + 
+			"    if ((len == 1)) {\n" + 
+			"      pn = data.points[0].pointNumber;\n" +
+			"      query"+i+" = queryArr"+i+"[tn][pn];\n" +
+			"      clickinfo"+i+".innerHTML = '<b><span style=\"color:#FF0000\">QUERY: '+query"+i+"+'</span></b><br>';\n" +
+			"      xArr=[];\n" +
+			"      yArr=[];\n" +
+			"      text=[];\n" +
+			"      opacities=[];\n" +
+			"	   for(k = 0; k<expSize; k++){\n" + 
+			"        if(activeLines"+i+".indexOf(k) < 0){" +
+			"          continue;" +
+			"        }" +
+			"        index = queryArr"+i+"[k].indexOf(query"+i+");" +
+			"        if(index >= 0){" +
+			"	       xArr[k] = round(((index+1)*100.0)/(queryArr"+i+"[k].length));\n" +
+			"	       yArr[k] = timesArr"+i+"[k][index];\n" +
+			"	       text[k] = getTime(timesArr"+i+"[k][index]);\n" +
+			"          opacities.push(1);\n" +
+			"          clickinfo"+i+".innerHTML += '<span style=\"color:'+colors[k]+'\"> '+expNames"+i+"[k]+': </span>'+" +
+			"            getTime(timesArr"+i+"[k][index])+' <br>';\n" +
+		    "        }\n" +
+			"      }" +
+
+			// plot restyle
+			"      update = {x: [xArr], y: [yArr],\n"+
+			"      text: [text],\n" + 
+			"      hoverinfo: 'x+text',\n" +
+			"      showlegend: false,\n" +
+			"      visible: true,\n" +
+			"      marker:{size:7, color: '#FF0000', opacity:opacities}};\n" +
+			"	   Plotly.restyle('myDiv"+i+"', update, expSize);\n" +
+			"      clickinfo"+i+".innerHTML += '<br>';\n" +
+			"    } else {\n" + 
+			"      clickinfo"+i+".innerHTML = '';\n" + 
+			"    }\n" + 
+			"  });\n" +
+
+			// event on doubleclick
+			"  myPlot"+i+".on('plotly_doubleclick', function(data){\n" +
+			"    update = {x: [[]], y: [[]], visible: false, marker:{opacity:[]}};" +
+			"	 Plotly.restyle('myDiv"+i+"', update, expSize);\n" +
+			"    clickinfo"+i+".innerHTML = '';\n" +
+			"  });\n" +
+			
+			// some help functions
+			"  function round(num) {\n" + 
+			"    return Math.round(num * 100) / 100;\n" +
+			"  }\n" + 
+			"  function getTime(time) {\n" + 
+			"	 return time;\n" + 
+			"  }\n" +
+			"  function refresh"+i+"() {\n" + 
+			"    minIndex = expSize-1;\n" +			
+			"    if(activeLines"+i+".indexOf(minIndex) >= 0) {\n " +
+			"      visitedQueries=[];\n" +
+
+			"	   for(k = 0; k<minIndex; k++){\n" + 
+			"        if(activeLines"+i+".indexOf(k) < 0){\n" +
+			"          continue;\n" +
+			"        }\n" +
+			"        if(visitedQueries.length == 0){\n" +
+			"          visitedQueries = queryArr"+i+"[k].slice();\n" +
+		    "        }else{\n" +
+		    "          visitedQueries = visitedQueries.filter(function(n) {\n" + 
+		    "		     return queryArr"+i+"[k].indexOf(n) !== -1;\n" + 
+		    "		   });\n" +
+		    "        }\n" +
+		    "      }" +
+
+			"      visitedResultQueries=[];\n" +
+		    "      queryResultArr=[];\n" +
+			"	   for(k = 0; k<minIndex; k++){\n" + 
+			"        if(activeLines"+i+".indexOf(k) < 0){\n" +
+			"          continue;\n" +
+			"        }\n" +
+			"	     for(l = 0; l<(visitedQueries.length); l++){\n" + 
+			"          query_ = visitedQueries[l];\n" +
+			"          visitedIndex = visitedResultQueries.indexOf(query_);\n" +
+			"          queryIndex = queryArr"+i+"[k].indexOf(query_);\n" +
+			"          if(visitedIndex < 0){\n" +
+			"            visitedResultQueries.push(query_);\n" +
+			"            queryResultArr.push({query : query_, time: timesArr"+i+"[k][queryIndex]});\n" +
+		    "          } else {\n" +
+			"            time_ = queryResultArr[visitedIndex].time;\n" +
+		    "            newTime = timesArr"+i+"[k][queryIndex];\n" +
+		    "            if(time_ > newTime) {\n" +
+		    "              queryResultArr[visitedIndex].time = newTime;\n" +
+		    "            }\n" +
+		    "          }\n" +
+		    "        }\n" +
+			"      }" +
+			"      queryResultArr.sort(custom_compare);\n" + 
+			"      xArrM=[];\n" +
+			"      yArrM=[];\n" +
+			"      textM=[];\n" +
+			"      queryNames=[];\n" +
+			"      queryTimes=[];\n" +
+			"      queryLength = visitedResultQueries.length;\n" +
+			"	   for(k = 0; k<queryLength; k++){\n" + 
+			"	       xArrM.push(round(((k+1)*100.0)/queryLength));\n" +
+			"	       yArrM.push(queryResultArr[k].time);\n" +
+			"	       textM.push(getTime(queryResultArr[k].time));\n" +
+			"		   queryNames.push(queryResultArr[k].query);\n" + 
+			"	       queryTimes.push(queryResultArr[k].time);\n" + 
+			"      }\n" +
+				   // plot restyle
+			"      if(myPlot"+i+".data[minIndex].visible == true) {\n" +
+			"        updateMin = {x: [xArrM], y: [yArrM],\n"+
+			"        text: [textM],\n" + 
+			"        visible: true,\n" +
+			"        hoverinfo: 'x+text'};" +
+			"	     Plotly.restyle('myDiv"+i+"', updateMin, [minIndex]);\n" + 
+			"      } else {\n" +
+			"        updateMin = {x: [xArrM], y: [yArrM],\n" +
+			"        text: [textM],\n" + 
+			"        visible: 'legendonly',\n" +
+			"        hoverinfo: 'x+text'};" +
+			"	     Plotly.restyle('myDiv"+i+"', updateMin, [minIndex]);\n" + 
+			"      }\n" +
+			"      queryArr"+i+"[minIndex] = queryNames;\n" +
+			"      timesArr"+i+"[minIndex] = queryTimes;\n" +
+			"    }\n" +
+
+			"      if(myPlot"+i+".data[expSize].visible == true) {\n " +
+			"        xArrP=[];\n" +
+			"        yArrP=[];\n" +
+			"        textP=[];\n" +
+			"        opacitiesP=[];\n" +
+			"  	     for(k = 0; k<expSize; k++){\n" + 
+			"          if(activeLines"+i+".indexOf(k) < 0){" +
+			"            continue;" +
+			"          }\n" +
+			"            index = queryArr"+i+"[k].indexOf(query"+i+");" +
+			"          if(index >= 0){" +
+			"  	         xArrP[k] = round(((index+1)*100.0)/(queryArr"+i+"[k].length));\n" +
+			"	         yArrP[k] = timesArr"+i+"[k][index];\n" +
+			"	         textP[k] = getTime(timesArr"+i+"[k][index]);\n" +
+			"            opacitiesP.push(1);\n" +
+		    "          }\n" +
+			"        }\n" +
+
+			// plot restyle
+			"        updatePoints = {x: [xArrP], y: [yArrP],\n"+
+			"        text: [textP],\n" + 
+			"        hoverinfo: 'x+text',\n" +
+			"        showlegend: false,\n" +
+			"        visible: true,\n" +
+			"        marker:{size:7, color: '#FF0000', opacity:opacitiesP}};" +
+			"	     Plotly.restyle('myDiv"+i+"', updatePoints, [expSize]);\n" + 
+			"      }\n" +
+			"  }\n" + 
+
+			"  function custom_compare (a,b) {\n" + 
+			"    return a.time - b.time;\n" + 
+			"  }\n" + 
+			"</script>\n");
+			i++;
+		}
+		
+		
 		return newFixedLengthResponse(String.format(TEMPLATE_RESULTS_, plotString.toString(), resultList.toString()));
 	}
 
@@ -1169,20 +1555,6 @@ public class ExperimentServer extends NanoHTTPD {
 		return queryResults_sort;
 	}
 
-	private static void addMinimum(int minIndex, ArrayList<ArrayList<QueryResult>> queryResults) {
-		ArrayList<QueryResult> minQueryResult = new ArrayList<QueryResult>();
-		int k = 0;
-		while(k<minIndex) {
-			ArrayList<QueryResult> queryResult = getQueryResult(queryResults, k);
-			minQueryResult.add(queryResult.stream().min(Comparator.comparing((QueryResult q) -> q.time)).get());
-			k++;
-		}
-		queryResults.add(minQueryResult);
-	}
-	
-	private static ArrayList<QueryResult> getQueryResult(ArrayList<ArrayList<QueryResult>> queryResults, int k) {
-		return new ArrayList<QueryResult>(queryResults.stream().map(list -> list.get(k)).collect(Collectors.toList()));
-	}
 
 	private static ArrayList<ArrayList<QueryResult>> minimizeQueryResults(ArrayList<ArrayList<QueryResult>> queryResults_all,
 			int minIndex) {

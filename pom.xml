@@ -7,11 +7,16 @@
 	<artifactId>docker-prunpinpointing-experiments</artifactId>
 	<version>0.1.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	
+
 	<name>docker-prunpinpointing-experiments</name>
 	<url>https://github.com/marnadir/docker-prunpinpointing-experiments</url>
-	
-	
+
+	<developers>
+		<developer>
+			<name>Marouane Nadir</name>
+			<email>marouane.nadir@uni-ulm.de</email>
+		</developer>
+	</developers>
 	<scm>
 		<connection>scm:git:https://github.com/marnadir/docker-prunpinpointing-experiments.git</connection>
 		<developerConnection>scm:git:git@github.com:marnadir/docker-prunpinpointing-experiments.git</developerConnection>
@@ -30,7 +35,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
+
 
 	<repositories>
 		<repository>
@@ -47,8 +52,7 @@
 
 
 
-	<!--<classifier>jar-with-dependencies</classifier>	
-	  -->		  
+	<!--<classifier>jar-with-dependencies</classifier> -->		  
 	<dependencies>
 		<dependency>
 			<groupId>com.github.marnadir</groupId>
@@ -82,7 +86,7 @@
 				<configuration>
 					<images>
 						<image>
-							<name>marnadir/docker-prunpinpointing-experiments::${project.version}</name>
+							<name>marnadir/docker-prunpinpointing-experiments:${project.version}</name>
 							<alias>prunpinpointing-container</alias>
 							<build>
 								<dockerFileDir>prunpinpointing</dockerFileDir>
