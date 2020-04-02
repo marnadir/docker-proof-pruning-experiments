@@ -122,7 +122,8 @@ done
 rm -rf $RESULTS_DIR
 mkdir -p $RESULTS_DIR
 
-
+for ONTOLOGY in `ls -1 $ONTOLOGIES_DIR`
+do
 	
 	echo `date "$TIME_LOG_FORMAT"` "running experiments on $INF_TYPE inferences"
 	
@@ -132,19 +133,19 @@ mkdir -p $RESULTS_DIR
 		EXPERIMENT_NAME=`basename -s ".sh" $EXPERIMENT`
 		echo `date "$TIME_LOG_FORMAT"` "running experiment $EXPERIMENT_NAME ..."
 		
-			
+			NAME=`basename -s ".owl" $ONTOLOGY`
 			echo `date "$TIME_LOG_FORMAT"` "... on $NAME"
 			DIR_NAME=$DATE.$NAME.$EXPERIMENT_NAME.$MACHINE_NAME.$INF_TYPE
 			rm -rf $LOGS_DIR/$DIR_NAME
 			mkdir -p $LOGS_DIR/$DIR_NAME
-			$EXPERIMENT_DIR/$EXPERIMENT $TIMEOUT $GLOBAL_TIMEOUT $QUERIES_DIR/$NAME.queries.seed1 $SCRIPTS_DIR $SCRIPTS_DIR $LOGS_DIR/$DIR_NAME $ONTOLOGIES_DIR
+			$EXPERIMENT_DIR/$EXPERIMENT $TIMEOUT $GLOBAL_TIMEOUT $QUERIES_DIR/$NAME.queries.seed1 $SCRIPTS_DIR $SCRIPTS_DIR $LOGS_DIR/$DIR_NAME $ONTOLOGIES_DIR/$ONTOLOGY 
 			cp $LOGS_DIR/$DIR_NAME/record.csv $RESULTS_DIR/$DIR_NAME.csv
 			
 		
 		
 	done
 
-
+done
 
 
 # Pack the results

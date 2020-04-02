@@ -18,6 +18,6 @@ shift
 PRUNETYPE=NO_PRUNE
 
 
-java $JAVA_MEMORY_OPTIONS -Dlog4j.configurationFile=log4j2-paramfiles.xml -Dlog.file.out=$OUTPUT_DIR/out.log -Dlog.file.err=$OUTPUT_DIR/err.log -cp "$CLASSPATH" org.liveontologies.pinpointing.RunProofExperiments -t "$TIMEOUT"000 -g "$GLOBAL_TIMEOUT"000 --progress $OUTPUT_DIR/record.csv $QUERY_FILE org.liveontologies.pinpointing.proofs.experiments.OwlResolutionProofExperiment -- $ONTOLOGIES_DIR/*.owl $PRUNETYPE
+java $JAVA_MEMORY_OPTIONS -Dlog4j.configurationFile=log4j2-paramfiles.xml -Dlog.file.out=$OUTPUT_DIR/out.log -Dlog.file.err=$OUTPUT_DIR/err.log -cp "$CLASSPATH" org.liveontologies.pinpointing.RunProofExperiments -t "$TIMEOUT"000 -g "$GLOBAL_TIMEOUT"000 --progress $OUTPUT_DIR/record.csv $QUERY_FILE org.liveontologies.pinpointing.proofs.experiments.OwlResolutionProofExperiment -- $ONTOLOGIES_DIR $PRUNETYPE
 
 
