@@ -1,4 +1,5 @@
 /*-
+ /*-
  * #%L
  * Docker Image for Axiom Pinpointing Experiments
  * $Id:$
@@ -774,7 +775,7 @@ public class ExperimentServer extends NanoHTTPD {
 			plotString.append("  traces = [\n");
 			// add experiments to plot
 			for(int k=0; k<expSize; k++) {
-				addToPlot(expNames.get(k), queryResults_sort.get(k), plotString, k);
+				addToPlot("proofs",expNames.get(k), queryResults_sort.get(k), plotString, k);
 			}
 
 			// markers for red points on click
@@ -801,14 +802,14 @@ public class ExperimentServer extends NanoHTTPD {
 			"    	 autorange: true,\n" +
 			"      },\n" + 
 			"      yaxis: {\n" + 
-			"       type: 'log',\n" + 
+			"       type: 'scatter',\n" + 
 		//	"    	tickvals: [0.001, 0.01, 0.1, 1, 10, 60],\n" + 
 		//	"    	ticktext: ['', '0.01', '0.1', '1', '10', '60'],\n" + 
 			"       autorange: true,\n"+
+			"       autotick: true,\n"+
 			"    	mirror: 'ticks',\n" + 
 			"    	linewidth: 1,\n" + 
-			"    	range: [-3, 2],\n" +
-			"       title: 'n° inferences'\n" +
+			"       title: 'n\\xB0 inferences'\n" +
 			"      }\n" + 
 			"    };\n");
 			
@@ -822,7 +823,7 @@ public class ExperimentServer extends NanoHTTPD {
 			plotString.append(
 			"  myPlot"+i+".on('plotly_legendclick', function(data){\n" + 
 			"	 number = data.curveNumber;\n" + 
-			"	 if(activeLines"+i+".indexOf(number) < 0){\n" + 
+			"	 if(activeLines"+i+".indexOf(number) <0){\n" + 
 			"		activeLines"+i+".push(number);\n" + 
 			"	 } else {\n" + 
 			"	    activeLines"+i+".splice(activeLines"+i+".indexOf(number), 1);\n" + 
@@ -882,7 +883,7 @@ public class ExperimentServer extends NanoHTTPD {
 			"          index = queryArr"+i+"[k].indexOf(query"+i+");" +
 			"          if((index >= 0) && (clickinfo"+i+".innerHTML != '')){\n" +
 			"            clickinfo"+i+".innerHTML += '<span style=\"color:'+colors[k]+'\"> '+expNames"+i+"[k]+': </span>'+" +
-			"              getTime(timesArr"+i+"[k][index])+' <br>';\n" +
+			"              getProofSize(timesArr"+i+"[k][index])+' <br>';\n" +
 		    "          }\n" +
 			"        }\n" +
 			"        clickinfo"+i+".innerHTML += '<br>';\n" +
@@ -916,7 +917,7 @@ public class ExperimentServer extends NanoHTTPD {
 			"        index = queryArr"+i+"[k].indexOf(query);" +
 			"        if(index >= 0){" +
 			"	       hoverinfo"+i+".innerHTML += '<span style=\"color:'+colors[k]+'\"> '+expNames"+i+"[k]+': </span>'+" +
-			"            getTime(timesArr"+i+"[k][index])+' <br>';" +
+			"            getProofSize(timesArr"+i+"[k][index])+' <br>';" +
 			"        }" +			
 			"      }"+ 
 			"    } else {\n" + 
@@ -949,10 +950,10 @@ public class ExperimentServer extends NanoHTTPD {
 			"        if(index >= 0){" +
 			"	       xArr[k] = round(((index+1)*100.0)/(queryArr"+i+"[k].length));\n" +
 			"	       yArr[k] = timesArr"+i+"[k][index];\n" +
-			"	       text[k] = getTime(timesArr"+i+"[k][index]);\n" +
+			"	       text[k] = getProofSize(timesArr"+i+"[k][index]);\n" +
 			"          opacities.push(1);\n" +
 			"          clickinfo"+i+".innerHTML += '<span style=\"color:'+colors[k]+'\"> '+expNames"+i+"[k]+': </span>'+" +
-			"            getTime(timesArr"+i+"[k][index])+' <br>';\n" +
+			"            getProofSize(timesArr"+i+"[k][index])+' <br>';\n" +
 		    "        }\n" +
 			"      }" +
 
@@ -981,8 +982,8 @@ public class ExperimentServer extends NanoHTTPD {
 			"  function round(num) {\n" + 
 			"    return Math.round(num * 100) / 100;\n" +
 			"  }\n" + 
-			"  function getTime(time) {\n" + 
-			"	 return time;\n" + 
+			"  function getProofSize(number) {\n" + 
+			"	 return number;\n" + 
 			"  }\n" +
 			"</script>\n");
 			i++;
@@ -1116,7 +1117,7 @@ public class ExperimentServer extends NanoHTTPD {
 			plotString.append("  traces = [\n");
 			// add experiments to plot
 			for(int k=0; k<expSize; k++) {
-				addToPlot(expNames.get(k), queryResults_sort.get(k), plotString, k);
+				addToPlot("time",expNames.get(k), queryResults_sort.get(k), plotString, k);
 			}
 
 			// markers for red points on click
@@ -1169,6 +1170,7 @@ public class ExperimentServer extends NanoHTTPD {
 			"	    activeLines"+i+".splice(activeLines"+i+".indexOf(number), 1);\n" + 
 			"	 }\n" + 
 			
+//			"    refresh"+i+"();\n " +
 			"	 if(myPlot"+i+".data[expSize].visible == true){\n" +
 			"      visibleLines = false;\n" +
 			"	   for(k = 0; k<(expSize-1); k++){\n" + 
@@ -1206,6 +1208,7 @@ public class ExperimentServer extends NanoHTTPD {
 			"	 } else {\n" + 
 			"	    activeLines"+i+".splice(activeLines"+i+".indexOf(number), 1);\n" + 
 			"	 }\n" + 
+//			"    refresh"+i+"();\n " +
 			"	 if(myPlot"+i+".data[expSize].visible == true){\n" +
 			"      visibleLines = false;\n" +
 			"	   for(k = 0; k<(expSize-1); k++){\n" + 
@@ -1323,7 +1326,10 @@ public class ExperimentServer extends NanoHTTPD {
 			"    return Math.round(num * 100) / 100;\n" +
 			"  }\n" + 
 			"  function getTime(time) {\n" + 
-			"	 return time;\n" + 
+			"	 if(time < 1) {\n" + 
+			"	   return round(time*1000)+' ms';\n" + 
+			"    }\n" + 
+			"	 return time < 60 ? round(time)+' s' : round(time/60)+' min';\n" + 
 			"  }\n" +
 			"</script>\n");
 			i++;
@@ -1355,7 +1361,7 @@ public class ExperimentServer extends NanoHTTPD {
 		return queryResults;
 	}
 
-	private void addToPlot(String expName, ArrayList<QueryResult> queryResult, StringBuilder plotString, int k) {
+	private void addToPlot(String plot,String expName, ArrayList<QueryResult> queryResult, StringBuilder plotString, int k) {
 		ArrayList<Double> xAxis = new ArrayList<Double>();
 		ArrayList<Double> times = new ArrayList<Double>();
 		ArrayList<String> text = new ArrayList<String>();
@@ -1365,7 +1371,12 @@ public class ExperimentServer extends NanoHTTPD {
 		for(QueryResult qr : queryResult) {
 			xAxis.add(round((++counter*100.0)/qSize));
 			times.add(qr.time);
-			text.add("'"+getTime(qr.time)+"'");
+			if(plot.equals("time")) {
+				text.add("'"+getTime(qr.time)+"'");
+			}else {
+				text.add("'"+getProofSize(qr.time)+"'");
+
+			}
 		}
 
 		plotString.append(
@@ -1382,8 +1393,18 @@ public class ExperimentServer extends NanoHTTPD {
 	}
 
 	private String getTime(Double time) {
+		
+		if(time < 1) {
+			return round(time*1000)+" ms";
+		}
+		return time < 60 ? round(time)+" s" : round(time/60)+" min";
+	}
+	
+	private String getProofSize(Double time) {		
 		return String.valueOf(time).split("\\.")[0];
 	}
+	
+	
 	
 	private Double round(Double number) {
 		return Math.round(number * 100) / 100.0;
