@@ -1,5 +1,4 @@
 /*-
- /*-
  * #%L
  * Docker Image for Axiom Pinpointing Experiments
  * $Id:$
@@ -1038,8 +1037,8 @@ public class ExperimentServer extends NanoHTTPD {
 		                input = line.split(",");
 
 						//query inf without pruning
-		                double inf = Double.valueOf(input[time]);
-		                QueryResult qr = new QueryResult(input[nameIndex],inf);
+		                double timeSec = Double.valueOf(input[time])/1000;
+		                QueryResult qr = new QueryResult(input[nameIndex],timeSec);
 						queryResult_time.add(qr);
 						
 						
@@ -1145,11 +1144,17 @@ public class ExperimentServer extends NanoHTTPD {
 			"      },\n" + 
 			"      yaxis: {\n" + 
 			"       type: 'log',\n" + 
-			"    	tickvals: [0.001, 0.01, 0.1, 1, 10, 60],\n" + 
-			"    	ticktext: ['', '0.01', '0.1', '1', '10', '60'],\n" + 
-			"    	mirror: 'ticks',\n" + 
-			"    	linewidth: 1,\n" + 
-			"    	range: [-3, 2],\n" +
+//			"    	tickvals: [0.00001,0.0001,0.001, 0.01, 0.1, 1, 10, 60],\n" + 
+//			"    	ticktext: ['','0.00001','0.0001','0.001', '0.01', '0.1', '1', '10', '60'],\n" + 
+//			"    	mirror: 'ticks',\n" + 
+//			"    	linewidth: 1,\n" + 
+//			"    	range: [-3, 2],\n" +
+//			"    	 autorange: true,\n" +
+
+		"       autorange: true,\n"+
+		"       autotick: true,\n"+
+		"    	mirror: 'ticks',\n" + 
+		"    	linewidth: 1,\n" + 
 			"       title: 'time in seconds'\n" +
 			"      }\n" + 
 			"    };\n");
@@ -1321,6 +1326,8 @@ public class ExperimentServer extends NanoHTTPD {
 			"    clickinfo"+i+".innerHTML = '';\n" +
 			"  });\n" +
 			
+			
+			
 			// some help functions
 			"  function round(num) {\n" + 
 			"    return Math.round(num * 100) / 100;\n" +
@@ -1329,7 +1336,7 @@ public class ExperimentServer extends NanoHTTPD {
 			"	 if(time < 1) {\n" + 
 			"	   return round(time*1000)+' ms';\n" + 
 			"    }\n" + 
-			"	 return time < 60 ? round(time)+' s' : round(time/60)+' min';\n" + 
+			"	 return round(time)+' s';\n" + 
 			"  }\n" +
 			"</script>\n");
 			i++;
@@ -1392,12 +1399,15 @@ public class ExperimentServer extends NanoHTTPD {
 		"},\n");
 	}
 
+	
+	
+	//time is given in ms
 	private String getTime(Double time) {
 		
 		if(time < 1) {
 			return round(time*1000)+" ms";
 		}
-		return time < 60 ? round(time)+" s" : round(time/60)+" min";
+		return round(time)+" s";
 	}
 	
 	private String getProofSize(Double time) {		
