@@ -802,8 +802,6 @@ public class ExperimentServer extends NanoHTTPD {
 			"      },\n" + 
 			"      yaxis: {\n" + 
 			"       type: 'scatter',\n" + 
-		//	"    	tickvals: [0.001, 0.01, 0.1, 1, 10, 60],\n" + 
-		//	"    	ticktext: ['', '0.01', '0.1', '1', '10', '60'],\n" + 
 			"       autorange: true,\n"+
 			"       autotick: true,\n"+
 			"    	mirror: 'ticks',\n" + 
@@ -1144,17 +1142,12 @@ public class ExperimentServer extends NanoHTTPD {
 			"      },\n" + 
 			"      yaxis: {\n" + 
 			"       type: 'log',\n" + 
-//			"    	tickvals: [0.00001,0.0001,0.001, 0.01, 0.1, 1, 10, 60],\n" + 
-//			"    	ticktext: ['','0.00001','0.0001','0.001', '0.01', '0.1', '1', '10', '60'],\n" + 
-//			"    	mirror: 'ticks',\n" + 
-//			"    	linewidth: 1,\n" + 
-//			"    	range: [-3, 2],\n" +
-//			"    	 autorange: true,\n" +
-
-		"       autorange: true,\n"+
-		"       autotick: true,\n"+
-		"    	mirror: 'ticks',\n" + 
-		"    	linewidth: 1,\n" + 
+			"    	tickvals: [0.00001,0.0001,0.001, 0.01, 0.1, 1, 10, 60],\n" + 
+			"    	ticktext: ['','0.00001','0.0001','0.001', '0.01', '0.1', '1', '10', '60'],\n" + 
+			"    	mirror: 'ticks',\n" + 
+			"    	linewidth: 1,\n" + 
+			"    	range: [-3, 2],\n" +
+			"    	 autorange: true,\n" +
 			"       title: 'time in seconds'\n" +
 			"      }\n" + 
 			"    };\n");
@@ -1175,7 +1168,6 @@ public class ExperimentServer extends NanoHTTPD {
 			"	    activeLines"+i+".splice(activeLines"+i+".indexOf(number), 1);\n" + 
 			"	 }\n" + 
 			
-//			"    refresh"+i+"();\n " +
 			"	 if(myPlot"+i+".data[expSize].visible == true){\n" +
 			"      visibleLines = false;\n" +
 			"	   for(k = 0; k<(expSize-1); k++){\n" + 
@@ -1213,7 +1205,6 @@ public class ExperimentServer extends NanoHTTPD {
 			"	 } else {\n" + 
 			"	    activeLines"+i+".splice(activeLines"+i+".indexOf(number), 1);\n" + 
 			"	 }\n" + 
-//			"    refresh"+i+"();\n " +
 			"	 if(myPlot"+i+".data[expSize].visible == true){\n" +
 			"      visibleLines = false;\n" +
 			"	   for(k = 0; k<(expSize-1); k++){\n" + 
