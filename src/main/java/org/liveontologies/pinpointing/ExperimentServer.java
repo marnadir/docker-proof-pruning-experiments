@@ -640,6 +640,7 @@ public class ExperimentServer extends NanoHTTPD {
 				return pathname.getName().endsWith(".csv");
 			}
 		});
+		Arrays.sort(files);
 		BufferedReader br = null;
 
 		// contains the javascript code
