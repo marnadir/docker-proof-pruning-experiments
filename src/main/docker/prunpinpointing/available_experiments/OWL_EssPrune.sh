@@ -14,11 +14,10 @@ OUTPUT_DIR=$1
 shift
 ONTOLOGIES_DIR=$1
 shift
+ENUMERATION_JUSTIFICATIONS_OPTIONS=$1
+shift
 
 PRUNETYPE=ESS_PRUNE
 
 
-java $JAVA_MEMORY_OPTIONS -Dlog4j.configurationFile=log4j2-paramfiles.xml -Dlog.file.out=$OUTPUT_DIR/out.log -Dlog.file.err=$OUTPUT_DIR/err.log -cp "$CLASSPATH" org.liveontologies.pinpointing.RunProofExperiments -t "$TIMEOUT"000 -g "$GLOBAL_TIMEOUT"000 --progress $OUTPUT_DIR/record.csv $QUERY_FILE org.liveontologies.pinpointing.proofs.experiments.OwlResolutionProofExperiment -- $ONTOLOGIES_DIR $PRUNETYPE
-
-
-
+java $JAVA_MEMORY_OPTIONS -Dlog4j.configurationFile=log4j2-paramfiles.xml -Dlog.file.out=$OUTPUT_DIR/out.log -Dlog.file.err=$OUTPUT_DIR/err.log -cp "$CLASSPATH" org.liveontologies.pinpointing.RunProofExperiments -t "$TIMEOUT"000 -g "$GLOBAL_TIMEOUT"000 --progress $OUTPUT_DIR/record.csv $QUERY_FILE org.liveontologies.pinpointing.proofs.experiments.OwlResolutionProofExperiment -j $ENUMERATION_JUSTIFICATIONS_OPTIONS -- $ONTOLOGIES_DIR $PRUNETYPE

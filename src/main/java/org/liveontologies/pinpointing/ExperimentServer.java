@@ -154,6 +154,8 @@ public class ExperimentServer extends NanoHTTPD {
 	private final File plotsDir_;
 	private final File resultsFile_;
 	private final String[] command_;
+	private boolean drawTimeJust_;
+
 
 	@GuardedBy("this")
 	private Process experimentProcess_ = null; 
@@ -172,6 +174,8 @@ public class ExperimentServer extends NanoHTTPD {
 	private static final String FIELD_UNTOLD_ = "untold";
 	private static final String FIELD_TAUT_ = "taut";
 	private static final String FIELD_NOBOTTOM_ = "nobottom";
+	private static final String FIELD_JUST_ = "justif";
+
 
 	private static final int DEFAULT_TIMEOUT_ = 60;
 	private static final int DEFAULT_GLOBAL_TIMEOUT_ = 3600;
@@ -201,6 +205,10 @@ public class ExperimentServer extends NanoHTTPD {
 			+ "    <p>Which tools should be used for the experiments:\n"
 			+ "%s"// tools fields
 			+ "    </p>\n"
+			+ "    <p>Options for enumaration of justificantion:<br/>"
+			+ "    <input type='checkbox' name='" + FIELD_JUST_ + "' checked value='" + FIELD_JUST_ + "'>\n"
+			+ "    <label for='" + FIELD_JUST_ + "'>enumeration justifications</label><br/>\n"
+		    + "    </p>\n"
 			+ "    <p>Options for query generation<br/>\n"
 			+ "    (for which subsumptions should the justification be computed)<br/>\n"
 			+ "    <input type='checkbox' name='" + FIELD_DIRECT_ + "' checked value='" + FIELD_DIRECT_ + "'>\n"
@@ -370,6 +378,7 @@ public class ExperimentServer extends NanoHTTPD {
 		final int globalTimeout;
 		final String sourceValue;
 		final String ontologies;
+		final String enumJust;
 		final String queryGenerationOptions;
 		final Set<String> selectedTools = new HashSet<>();
 		try {
@@ -477,6 +486,10 @@ public class ExperimentServer extends NanoHTTPD {
 				ontologies = null;
 			}
 			LOGGER_.info("ontologiesValue: {}", ontologies);
+			enumJust=enumJustsOptions(params.containsKey(FIELD_JUST_));
+			LOGGER_.info("enumaration justifications: {}", enumJust);
+
+
 
 			queryGenerationOptions = createQueryGenerationOptions(
 					params.containsKey(FIELD_DIRECT_),
@@ -531,7 +544,7 @@ public class ExperimentServer extends NanoHTTPD {
 					experimentLogLastLine_.setLength(0);
 					experimentProcess_ = new ProcessBuilder(substituteCommand(
 							command_, timeout, globalTimeout, sourceValue,
-							ontologies, queryGenerationOptions))
+							ontologies, queryGenerationOptions,enumJust))
 									.redirectErrorStream(true).start();
 				}
 
@@ -589,6 +602,18 @@ public class ExperimentServer extends NanoHTTPD {
 		return result.toString();
 	}
 
+	private String enumJustsOptions(final boolean enumJust) {
+		final StringBuilder result = new StringBuilder();
+		if (enumJust) {
+			result.append("enumJust");
+			drawTimeJust_=true;
+		} else {
+			result.append("NOenumJust");
+			drawTimeJust_=false;
+
+		}
+		return result.toString();
+	}
 	private Response logView(final IHTTPSession session) {
 		LOGGER_.info("log view");
 		return newFixedLengthResponse(String.format(TEMPLATE_LOG_, ""));
@@ -987,6 +1012,7 @@ public class ExperimentServer extends NanoHTTPD {
 			i++;
 		}
 
+		if (drawTimeJust_) {
 		for (final String ontologieName : ontologiesList) {
 			
 			// contains all sorted results with name of queries and times
@@ -1332,7 +1358,7 @@ public class ExperimentServer extends NanoHTTPD {
 			"</script>\n");
 			i++;
 		}
-		
+		}
 		
 		return newFixedLengthResponse(String.format(TEMPLATE_RESULTS_, plotString.toString(), resultList.toString()));
 	}
@@ -1608,6 +1634,8 @@ public class ExperimentServer extends NanoHTTPD {
 	private static final String PATTERN_SOURCE_ = "<s>";
 	private static final String PATTERN_ONTOLOGIES_ = "<o>";
 	private static final String PATTERN_QUERY_GENERATION_OPTIONS_ = "<q>";
+	private static final String PATTERN_ENUMERATION_JUSTIFICATION_OPTIONS_ = "<j>";
+
 
 	private static String substituteCommand(final String command,
 			final String pattern, final String value) {
@@ -1623,11 +1651,12 @@ public class ExperimentServer extends NanoHTTPD {
 	private static String[] substituteCommand(final String[] command,
 			final int localTimeout, final int globalTimeout,
 			final String source, final String ontologies,
-			final String queryGenerationOptions) {
+			final String queryGenerationOptions,final String enumJust) {
 		final String[] result = new String[command.length];
 		for (int i = 0; i < command.length; i++) {
 			result[i] = substituteCommand(
 					substituteCommand(
+							substituteCommand(
 							substituteCommand(
 									substituteCommand(
 											substituteCommand(command[i],
@@ -1637,7 +1666,8 @@ public class ExperimentServer extends NanoHTTPD {
 											"" + globalTimeout),
 									PATTERN_SOURCE_, source),
 							PATTERN_ONTOLOGIES_, ontologies),
-					PATTERN_QUERY_GENERATION_OPTIONS_, queryGenerationOptions);
+					PATTERN_QUERY_GENERATION_OPTIONS_, queryGenerationOptions),
+					PATTERN_ENUMERATION_JUSTIFICATION_OPTIONS_,enumJust);
 		}
 		return result;
 	}
